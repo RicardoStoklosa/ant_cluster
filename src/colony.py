@@ -48,7 +48,7 @@ class Colony:
                 color = LIGHT_GRAY
                 if self.map.grid[row][column]["busy"]:
                     color = RED
-                elif self.map.grid[row][column]["value"] == 1:
+                elif self.map.grid[row][column]["value"] > 0:
                     color = BLACK
                 pygame.draw.rect(
                     self.screen,

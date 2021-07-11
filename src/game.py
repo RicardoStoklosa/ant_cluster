@@ -3,12 +3,13 @@ import pygame_gui
 from map import Map
 from colors import *
 from colony import Colony
+import math
 
 
 class Game:
     running = True
     pause = False
-    fps = 0
+    fps = "0"
 
     def __init__(self, width: int, height: int):
         self.window = [width, height]
@@ -33,11 +34,10 @@ class Game:
         self.time_delta = self.clock.tick(60) / 1000.0
 
         while self.running:
+            self.clock.tick(60)
             events = pygame.event.get()
             self.handle_keyboard(events)
             if not self.pause:
-                for _ in range(self.fps):
-                    self.game_loop(render=False)
                 self.game_loop()
             pygame.display.flip()
 
@@ -89,14 +89,15 @@ class Game:
                     self.map.pos_y = mouse_y + self.mouse_offset_y
 
             # print(self.map.pos)
-            # self.gui.process_events(event)
+            self.gui.process_events(event)
 
     def game_loop(self, render=True):
         self.screen.fill(GRAY)
         pygame_gui.elements.UILabel(
-            pygame.Rect((0, 0), (100, 50)), str(self.fps), self.gui
+            pygame.Rect((0, 0), (100, 50)), str(math.ceil(self.clock.get_fps())), self.gui
         )
-        self.gui.update(self.time_delta)
+        print(str(math.ceil(self.clock.get_fps())))
+        # self.gui.update(self.time_delta)
         self.colony.update_ants_position()
         self.colony.draw()
 
