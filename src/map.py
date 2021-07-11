@@ -14,7 +14,9 @@ class Map:
         self.pos_y = 0
         self._zoom = 0
         self.drag = False
-        self.grid = [[0 for _ in range(size)] for _ in range(size)]
+        self.grid = [
+            [{"value": 0, "busy": False} for _ in range(size)] for _ in range(size)
+        ]
 
         self.block_size = block_size
 
@@ -26,7 +28,7 @@ class Map:
             for x in range(self.height):
                 if random() <= fill_percentage:
                     r = randint(0, 1)
-                    self.grid[y][x] = r
+                    self.grid[y][x]["value"] = r
 
     @property
     def zoom(self):

@@ -23,9 +23,11 @@ class Colony:
 
     def generate_ants(self):
         for _ in range(self.population_size):
-            x = randint(0, self.map.size)
-            y = randint(0, self.map.size)
+            x = randint(0, self.map.size-1)
+            y = randint(0, self.map.size-1)
             ant = Ant((x, y), self.ANT_VIEW_RANGE, self.map)
+            self.map.grid[x][y]["busy"] = True
+
             self.ants.append(ant)
 
     def update_ants_position(self):
@@ -44,7 +46,9 @@ class Colony:
         for row in range(self.map.size):
             for column in range(self.map.size):
                 color = LIGHT_GRAY
-                if self.map.grid[row][column] == 1:
+                if self.map.grid[row][column]["busy"]:
+                    color = RED
+                elif self.map.grid[row][column]["value"] == 1:
                     color = BLACK
                 pygame.draw.rect(
                     self.screen,
@@ -59,18 +63,18 @@ class Colony:
                     ).move(x, y),
                 )
 
-        for ant in self.ants:
-            color = RED if ant.carrying else GREEN
+        # for ant in self.ants:
+        #     color = RED if ant.carrying else GREEN
 
-            pygame.draw.rect(
-                self.screen,
-                color,
-                pygame.Rect(
-                    [
-                        (size) * (ant.x),
-                        (size) * (ant.y),
-                        size,
-                        size,
-                    ]
-                ).move(x, y),
-            )
+        #     pygame.draw.rect(
+        #         self.screen,
+        #         color,
+        #         pygame.Rect(
+        #             [
+        #                 (size) * (ant.x),
+        #                 (size) * (ant.y),
+        #                 size,
+        #                 size,
+        #             ]
+        #         ).move(x, y),
+        #     )

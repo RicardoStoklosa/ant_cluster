@@ -22,12 +22,10 @@ class Ant:
 
     def walk(self):
         walk = lambda x: min(max(random_move(x), 0), self.map.size - 1)
+        self.map.grid[self.x][self.y]["busy"] = False
         self.x = walk(self.x)
         self.y = walk(self.y)
-        self.map.grid[self.x][self.y] = self
-
-    def look(self):
-        
+        self.map.grid[self.x][self.y]["busy"] = True
 
     def action(self):
         if "algo":
