@@ -5,6 +5,8 @@ from colors import *
 from colony import Colony
 import math
 
+cont = 0
+
 
 class Game:
     running = True
@@ -14,8 +16,8 @@ class Game:
     def __init__(self, width: int, height: int):
         self.window = [width, height]
         self.init_pygame()
-        self.map = Map(133, 4, self.screen)
-        self.colony = Colony(self.screen, self.map, 100, 2)
+        self.map = Map(50, 5, self.screen)
+        self.colony = Colony(self.screen, self.map, 100, 3)
         self.mouse_offset_x = 0
         self.mouse_offset_y = 0
 
@@ -34,7 +36,7 @@ class Game:
         self.time_delta = self.clock.tick(60) / 1000.0
 
         while self.running:
-            self.clock.tick(60)
+            self.clock.tick()
             events = pygame.event.get()
             self.handle_keyboard(events)
             if not self.pause:
@@ -92,14 +94,20 @@ class Game:
             self.gui.process_events(event)
 
     def game_loop(self, render=True):
-        self.screen.fill(GRAY)
-        pygame_gui.elements.UILabel(
-            pygame.Rect((0, 0), (100, 50)), str(math.ceil(self.clock.get_fps())), self.gui
-        )
-        print(str(math.ceil(self.clock.get_fps())))
+        global cont
+        # pygame_gui.elements.UILabel(
+        #     pygame.Rect((0, 0), (100, 50)),
+        #     str(math.ceil(self.clock.get_fps())),
+        #     self.gui,
+        # )
         # self.gui.update(self.time_delta)
+        # print(str(math.ceil(self.clock.get_fps())))
         self.colony.update_ants_position()
-        self.colony.draw()
+        cont += 1
+        if cont % 100:
+            self.screen.fill(GRAY)
+            print(f"Época: {cont}")
+            self.colony.draw()
 
         # self.gui.draw_ui(self.screen)
 

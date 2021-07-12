@@ -23,10 +23,10 @@ class Colony:
 
     def generate_ants(self):
         for _ in range(self.population_size):
-            x = randint(0, self.map.size-1)
-            y = randint(0, self.map.size-1)
+            x = randint(0, self.map.size - 1)
+            y = randint(0, self.map.size - 1)
             ant = Ant((x, y), self.ANT_VIEW_RANGE, self.map)
-            self.map.grid[x][y]["busy"] = True
+            self.map.grid[x][y]["busy"] = 1
 
             self.ants.append(ant)
 
@@ -46,8 +46,10 @@ class Colony:
         for row in range(self.map.size):
             for column in range(self.map.size):
                 color = LIGHT_GRAY
-                if self.map.grid[row][column]["busy"]:
+                if self.map.grid[row][column]["busy"] == 2:
                     color = RED
+                elif self.map.grid[row][column]["busy"] == 1:
+                    color = GREEN
                 elif self.map.grid[row][column]["value"] > 0:
                     color = BLACK
                 pygame.draw.rect(

@@ -15,13 +15,13 @@ class Map:
         self._zoom = 0
         self.drag = False
         self.grid = [
-            [{"value": 0, "busy": False} for _ in range(size)] for _ in range(size)
+            [{"value": 0, "busy": 0} for _ in range(size)] for _ in range(size)
         ]
 
         self.block_size = block_size
 
         self.margin = math.ceil(self.block_size * 0.2)
-        self.random_generator(0.3)
+        self.random_generator(0.5)
 
     def random_generator(self, fill_percentage):
         for y in range(self.width):
