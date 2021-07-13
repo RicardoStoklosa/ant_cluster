@@ -4,13 +4,12 @@ from map import Map
 from colors import *
 from colony import Colony
 
-cont = 0
-
 
 class Game:
+    epoch = 0
     running = True
     pause = False
-    fps = "0"
+    step = False
 
     def __init__(self, width: int, height: int):
         self.window = [width, height]
@@ -19,6 +18,7 @@ class Game:
         self.colony = Colony(self.screen, self.map, 100, 1)
         self.mouse_offset_x = 0
         self.mouse_offset_y = 0
+        self.simulation_pace = 10
 
     def init_pygame(self):
         pygame.init()
@@ -37,31 +37,26 @@ class Game:
             self.clock.tick()
             events = pygame.event.get()
             self.handle_keyboard(events)
+
+            if self.step:
+                self.simulation_calculus()
+                self.simulation_render(1)
+                self.step = not self.step
+
             if not self.pause:
-                self.game_loop()
+                self.simulation_calculus()
+            self.simulation_render(self.simulation_pace)
+
             pygame.display.flip()
 
     def handle_keyboard(self, events):
         for event in events:
             map_mov = 5
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    self.map.pos_x += map_mov
                 if event.key == pygame.K_RIGHT:
-                    self.map.pos_x -= map_mov
-                if event.key == pygame.K_UP:
-                    self.map.pos_y += map_mov
-                if event.key == pygame.K_DOWN:
-                    self.map.pos_y -= map_mov
-                if event.key == 61:
-                    print("+")
-                    self.map.block_size += 5
-                if event.key == pygame.K_MINUS:
-                    self.map.block_size -= 5
+                    self.step = True
                 if event.key == pygame.K_SPACE:
                     self.pause = not self.pause
-                if event.type == pygame.QUIT:
-                    self.running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 4:
                     self.map.zoom += map_mov
@@ -86,14 +81,18 @@ class Game:
 
             self.gui.process_events(event)
 
-    def game_loop(self, render=True):
-        global cont
+    def simulation_calculus(self):
         self.colony.update_ants_position()
-        cont += 1
-        if cont % 10 == 0:
+        self.epoch += 1
+
+    def simulation_render(self, pace):
+        if self.epoch % pace == 0 or self.pause:
             self.screen.fill(GRAY)
-            print(f"Época: {cont}")
             self.colony.draw()
+            if not self.pause or self.step:
+                print(f"Época: {self.epoch}")
 
 
-Game(1200, 1200).run()
+if __name__ == "__main__":
+    game = Game(1200, 1200)
+    game.run()
