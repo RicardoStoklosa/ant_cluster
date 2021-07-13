@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, sample
 import math
 
 import pygame
@@ -20,19 +20,20 @@ def get_view(grid, x, y, n):
         if i < 0:
             i = h + i + 1
         elif i > h:
-            i = 0 + i -1
+            i = 0 + i - 1
 
         line = []
         for j in range(l, r + 1):
             if j < 0:
                 j = v + j + 1
             elif j > v:
-                j = 0 + j -1
+                j = 0 + j - 1
 
             line.append(grid[i][j])
         res.append(line)
 
     return res
+
 
 class Colony:
     def __init__(self, screen, map_grid, population_size, ant_view_range):
@@ -45,12 +46,12 @@ class Colony:
         self.pos = (0, 0)
 
     def generate_ants(self):
-        for _ in range(self.population_size):
-            x = randint(0, self.map.size - 1)
-            y = randint(0, self.map.size - 1)
+        indices = [(m, n) for m in range(self.map.size) for n in range(self.map.size)]
+        candidates = sample(indices, self.population_size)
+
+        for x, y in candidates:
             ant = Ant((x, y), self.ANT_VIEW_RANGE, self.map)
             self.map.grid[x][y]["busy"] = 1
-
             self.ants.append(ant)
 
     def update_ants_position(self):
