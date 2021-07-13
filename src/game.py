@@ -3,7 +3,6 @@ import pygame_gui
 from map import Map
 from colors import *
 from colony import Colony
-import math
 
 cont = 0
 
@@ -26,7 +25,6 @@ class Game:
 
         self.screen = pygame.display.set_mode(self.window)
         self.gui = pygame_gui.UIManager(self.window)
-        self.ui()
 
         pygame.display.set_caption("Ant Clusterring")
 
@@ -42,10 +40,6 @@ class Game:
             if not self.pause:
                 self.game_loop()
             pygame.display.flip()
-
-    def ui(self):
-        pass
-        # hello_button = pygame_gui.elements.UILabel(pygame.Rect((0, 0), (100, 50)), str(self.fps), self.gui)
 
     def handle_keyboard(self, events):
         for event in events:
@@ -90,26 +84,16 @@ class Game:
                     self.map.pos_x = mouse_x + self.mouse_offset_x
                     self.map.pos_y = mouse_y + self.mouse_offset_y
 
-            # print(self.map.pos)
             self.gui.process_events(event)
 
     def game_loop(self, render=True):
         global cont
-        # pygame_gui.elements.UILabel(
-        #     pygame.Rect((0, 0), (100, 50)),
-        #     str(math.ceil(self.clock.get_fps())),
-        #     self.gui,
-        # )
-        # self.gui.update(self.time_delta)
-        # print(str(math.ceil(self.clock.get_fps())))
         self.colony.update_ants_position()
         cont += 1
         if cont % 10 == 0:
             self.screen.fill(GRAY)
             print(f"Época: {cont}")
             self.colony.draw()
-
-        # self.gui.draw_ui(self.screen)
 
 
 Game(1200, 1200).run()

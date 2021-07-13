@@ -76,19 +76,3 @@ class Colony:
                         ]
                     ).move(x, y),
                 )
-
-        # for ant in self.ants:
-        #     color = RED if ant.carrying else GREEN
-
-        #     pygame.draw.rect(
-        #         self.screen,
-        #         color,
-        #         pygame.Rect(
-        #             [
-        #                 (size) * (ant.x),
-        #                 (size) * (ant.y),
-        #                 size,
-        #                 size,
-        #             ]
-        #         ).move(x, y),
-        #     )
