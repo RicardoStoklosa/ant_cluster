@@ -4,10 +4,6 @@ from random import choices, random
 from colors import *
 
 
-def random_move(pos):
-    return pos + choices([-1, 1])[0]
-
-
 class Ant:
     def __init__(self, position, range, map):
         self.x = position[0]
