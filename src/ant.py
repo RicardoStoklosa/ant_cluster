@@ -51,7 +51,7 @@ class Ant:
 
     def walk(self, world):
         candidates = self.get_valid_movement(world)
-        if len(candidates):
+        if candidates:
             world.grid[self.x][self.y]["busy"] = 0
             self.x, self.y = choices(candidates)[0]
             world.grid[self.x][self.y]["busy"] = 2 if self.carrying > 0 else 1
