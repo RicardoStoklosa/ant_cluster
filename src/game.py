@@ -17,7 +17,7 @@ class Game:
         self.window = [width, height]
         self.init_pygame()
         self.map = Map(50, 5, self.screen)
-        self.colony = Colony(self.screen, self.map, 100, 3)
+        self.colony = Colony(self.screen, self.map, 100, 1)
         self.mouse_offset_x = 0
         self.mouse_offset_y = 0
 
@@ -104,7 +104,7 @@ class Game:
         # print(str(math.ceil(self.clock.get_fps())))
         self.colony.update_ants_position()
         cont += 1
-        if cont % 100:
+        if cont % 10 == 0:
             self.screen.fill(GRAY)
             print(f"Época: {cont}")
             self.colony.draw()

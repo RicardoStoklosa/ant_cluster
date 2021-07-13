@@ -1,4 +1,4 @@
-from random import choices, randint
+from random import randint
 import math
 
 import pygame
@@ -7,8 +7,19 @@ from ant import Ant
 from colors import *
 
 
-def random_move(pos):
-    return pos + choices([-1, 0, 1])[0]
+def get_view(grid, x, y, n):
+    h = len(grid)
+    v = len(grid[0])
+    u = max(0, y - n)
+    d = min(h - 1, y + n)
+    l = max(0, x - n)
+    r = min(v - 1, x + n)
+
+    res = []
+    for i in range(u, d + 1):
+        res.append(grid[i][l : r + 1])
+
+    return res
 
 
 class Colony:
@@ -32,7 +43,8 @@ class Colony:
 
     def update_ants_position(self):
         for ant in self.ants:
-            ant.action()
+            view_field = get_view(self.map.grid, ant.x, ant.y, self.ANT_VIEW_RANGE)
+            ant.action(self.map, view_field)
 
     def draw(self):
         zoom_p = self.map._zoom / 100

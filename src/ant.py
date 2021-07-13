@@ -8,21 +8,6 @@ def random_move(pos):
     return pos + choices([-1, 0, 1])[0]
 
 
-def get_view(grid, x, y, n):
-    h = len(grid)
-    v = len(grid[0])
-    u = max(0, y - n)
-    d = min(h - 1, y + n)
-    l = max(0, x - n)
-    r = min(v - 1, x + n)
-
-    res = []
-    for i in range(u, d + 1):
-        res.append(grid[i][l : r + 1])
-
-    return res
-
-
 class Ant:
     def __init__(self, position, range, map):
         self.x = position[0]
@@ -30,7 +15,6 @@ class Ant:
         self.vision_range = range
         self.field_size = (1 + 2 * range) ** 2
         self.carrying = 0
-        self.map = map
         self.block_size = 1
         self.alpha = 3
 
@@ -40,26 +24,24 @@ class Ant:
     # 1 - ocupado
     # 2 - ocupado e carregando
 
-    def walk(self):
-        walk = lambda x: min(max(random_move(x), 0), self.map.size - 1)
-        self.map.grid[self.x][self.y]["busy"] = 0
+    def walk(self, world):
+        walk = lambda x: min(max(random_move(x), 0), world.size - 1)
+        world.grid[self.x][self.y]["busy"] = 0
         self.x = walk(self.x)
         self.y = walk(self.y)
-        self.map.grid[self.x][self.y]["busy"] = 2 if self.carrying > 0 else 1
+        world.grid[self.x][self.y]["busy"] = 2 if self.carrying > 0 else 1
 
-    def pick_body(self):
+    def pick_body(self, world):
         if self.carrying == 0:
-            self.carrying = self.map.grid[self.x][self.y]["value"]
-            self.map.grid[self.x][self.y]["value"] = 0
+            self.carrying = world.grid[self.x][self.y]["value"]
+            world.grid[self.x][self.y]["value"] = 0
 
-    def drop_body(self):
+    def drop_body(self, world):
         if self.carrying > 0:
-            self.map.grid[self.x][self.y]["value"] = self.carrying
+            world.grid[self.x][self.y]["value"] = self.carrying
             self.carrying = 0
 
-    def look_and_count(self):
-        view_field = get_view(self.map.grid, self.x, self.y, self.vision_range)
-
+    def look_and_count(self, view_field):
         n_local = 0
 
         for row in view_field:
@@ -68,24 +50,24 @@ class Ant:
                     n_local += 1
         return n_local + 0.1
 
-    def action(self):
+    def action(self, world, view_field):
         if self.carrying:
-            if self.map.grid[self.x][self.y]["value"] > 0:
-                self.walk()
+            if world.grid[self.x][self.y]["value"] > 0:
+                self.walk(world)
             else:
-                p = (self.look_and_count() / self.field_size) ** 2
+                p = (self.look_and_count(view_field) / self.field_size) ** 2
                 if p * self.alpha > random():
-                    self.drop_body()
-                    self.walk()
+                    self.drop_body(world)
+                    self.walk(world)
                 else:
-                    self.walk()
+                    self.walk(world)
         else:
-            if self.map.grid[self.x][self.y]["value"] > 0:
-                p = (self.look_and_count() / self.field_size) ** 2
-                if p / self.alpha < random():
-                    self.pick_body()
-                    self.walk()
+            if world.grid[self.x][self.y]["value"] > 0:
+                p = (self.look_and_count(view_field) / self.field_size) ** 2
+                if p < random():
+                    self.pick_body(world)
+                    self.walk(world)
                 else:
-                    self.walk()
+                    self.walk(world)
             else:
-                self.walk()
+                self.walk(world)
