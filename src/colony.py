@@ -8,19 +8,31 @@ from colors import *
 
 
 def get_view(grid, x, y, n):
-    h = len(grid)
-    v = len(grid[0])
-    u = max(0, y - n)
-    d = min(h - 1, y + n)
-    l = max(0, x - n)
-    r = min(v - 1, x + n)
+    h = len(grid) - 1
+    v = len(grid[0]) - 1
+    u = y - n
+    d = y + n
+    l = x - n
+    r = x + n
 
     res = []
     for i in range(u, d + 1):
-        res.append(grid[i][l : r + 1])
+        if i < 0:
+            i = h + i + 1
+        elif i > h:
+            i = 0 + i -1
+
+        line = []
+        for j in range(l, r + 1):
+            if j < 0:
+                j = v + j + 1
+            elif j > v:
+                j = 0 + j -1
+
+            line.append(grid[i][j])
+        res.append(line)
 
     return res
-
 
 class Colony:
     def __init__(self, screen, map_grid, population_size, ant_view_range):
