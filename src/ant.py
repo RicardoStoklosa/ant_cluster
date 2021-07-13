@@ -4,10 +4,6 @@ from random import choices, random
 from colors import *
 
 
-def random_move(pos):
-    return pos + choices([-1, 0, 1])[0]
-
-
 class Ant:
     def __init__(self, position, range, map):
         self.x = position[0]
@@ -24,20 +20,37 @@ class Ant:
     # 1 - ocupado
     # 2 - ocupado e carregando
 
-    def non_busy_location(self, world):
-        walk = lambda x: min(max(random_move(x), 0), world.size - 1)
-        candidate_x, candidate_y = walk(self.x), walk(self.y)
-        while (
-            world.grid[candidate_x][candidate_y]["busy"] != 0
-            and candidate_x != 0 != candidate_y
-        ):
-            candidate_x, candidate_y = walk(candidate_x), walk(candidate_y)
-        return candidate_x, candidate_y
+    def pacman_move(self, axis, size, movement=1):
+        if axis < 0:
+            axis = size - movement
+        elif axis >= size:
+            axis = movement - 1
+
+        return axis
+
+    def get_valid_movement(self, world):
+        valid_movements = []
+
+        for i in [-1, 0, 1]:
+            for j in [-1, 0, 1]:
+                if i != 0 or j != 0:
+                    x = self.x + i
+                    y = self.y + j
+
+                    x = self.pacman_move(x, world.size)
+                    y = self.pacman_move(y, world.size)
+
+                    if world.grid[x][y]["busy"] == 0:
+                        valid_movements.append((x, y))
+
+        return valid_movements
 
     def walk(self, world):
-        world.grid[self.x][self.y]["busy"] = 0
-        self.x, self.y = self.non_busy_location(world)
-        world.grid[self.x][self.y]["busy"] = 2 if self.carrying > 0 else 1
+        candidates = self.get_valid_movement(world)
+        if candidates:
+            world.grid[self.x][self.y]["busy"] = 0
+            self.x, self.y = choices(candidates)[0]
+            world.grid[self.x][self.y]["busy"] = 2 if self.carrying > 0 else 1
 
     def pick_body(self, world):
         if self.carrying == 0:
