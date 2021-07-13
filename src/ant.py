@@ -13,7 +13,7 @@ class Ant:
         self.x = position[0]
         self.y = position[1]
         self.vision_range = range
-        self.field_size = (1 + 2 * range) ** 2
+        self.field_size = (1 + 2 * range) ** 2 - 1
         self.carrying = 0
         self.block_size = 1
         self.alpha = 3
@@ -24,11 +24,19 @@ class Ant:
     # 1 - ocupado
     # 2 - ocupado e carregando
 
-    def walk(self, world):
+    def non_busy_location(self, world):
         walk = lambda x: min(max(random_move(x), 0), world.size - 1)
+        candidate_x, candidate_y = walk(self.x), walk(self.y)
+        while (
+            world.grid[candidate_x][candidate_y]["busy"] != 0
+            and candidate_x != 0 != candidate_y
+        ):
+            candidate_x, candidate_y = walk(candidate_x), walk(candidate_y)
+        return candidate_x, candidate_y
+
+    def walk(self, world):
         world.grid[self.x][self.y]["busy"] = 0
-        self.x = walk(self.x)
-        self.y = walk(self.y)
+        self.x, self.y = self.non_busy_location(world)
         world.grid[self.x][self.y]["busy"] = 2 if self.carrying > 0 else 1
 
     def pick_body(self, world):
@@ -42,7 +50,7 @@ class Ant:
             self.carrying = 0
 
     def look_and_count(self, view_field):
-        n_local = 0
+        n_local = -1  # discounting himself
 
         for row in view_field:
             for col in row:
