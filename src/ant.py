@@ -4,15 +4,24 @@ from random import choices, random
 from colors import *
 
 
+def p_pick(k, f):
+    return (k / (k + f)) ** 2
+
+
+def p_drop(k, f):
+    return 2 * f if f < k else 1
+
+
 class Ant:
-    def __init__(self, position, range, map):
+    def __init__(self, position, range):
         self.x = position[0]
         self.y = position[1]
         self.vision_range = range
         self.field_size = (1 + 2 * range) ** 2 - 1
         self.carrying = 0
         self.block_size = 1
-        self.alpha = 3
+        self.k_pick = 0.5
+        self.k_drop = 0.4
 
         self.margin = math.ceil(self.block_size * 0.1)
 
@@ -69,23 +78,25 @@ class Ant:
             for col in row:
                 if col["value"] > 0:
                     n_local += 1
-        return n_local + 0.1
+        return n_local
 
     def action(self, world, view_field):
         if self.carrying:
             if world.grid[self.x][self.y]["value"] > 0:
                 self.walk(world)
             else:
-                p = (self.look_and_count(view_field) / self.field_size) ** 2
-                if p * self.alpha > random():
+                f = self.look_and_count(view_field) / self.field_size
+                p = p_drop(self.k_drop, f)
+                if p > random():
                     self.drop_body(world)
                     self.walk(world)
                 else:
                     self.walk(world)
         else:
             if world.grid[self.x][self.y]["value"] > 0:
-                p = (self.look_and_count(view_field) / self.field_size) ** 2
-                if p < random():
+                f = self.look_and_count(view_field) / self.field_size
+                p = p_pick(self.k_pick, f)
+                if p > random():
                     self.pick_body(world)
                     self.walk(world)
                 else:

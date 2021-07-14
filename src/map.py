@@ -5,7 +5,7 @@ from random import random, randint
 
 
 class Map:
-    def __init__(self, size, block_size: int, screen):
+    def __init__(self, size, block_size: int, density: float, screen):
         self.width = size
         self.height = size
         self.size = size
@@ -21,7 +21,7 @@ class Map:
         self.block_size = block_size
 
         self.margin = math.ceil(self.block_size * 0.2)
-        self.random_generator(0.5)
+        self.random_generator(density)
 
     def random_generator(self, fill_percentage):
         for y in range(self.width):

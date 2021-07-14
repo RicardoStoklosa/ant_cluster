@@ -14,8 +14,8 @@ class Game:
     def __init__(self, width: int, height: int):
         self.window = [width, height]
         self.init_pygame()
-        self.map = Map(50, 5, self.screen)
-        self.colony = Colony(self.screen, self.map, 100, 1)
+        self.map = Map(50, 5, 0.5, self.screen)
+        self.colony = Colony(self.screen, self.map, 200, 1)
         self.mouse_offset_x = 0
         self.mouse_offset_y = 0
         self.simulation_pace = 10
