@@ -1,8 +1,12 @@
+from collections import namedtuple
+from typing import List, NamedTuple
 import pygame
 import pygame_gui
 from map import Map
 from colors import *
 from colony import Colony
+from pathlib import Path
+from data import Data
 
 
 class Game:
@@ -11,14 +15,35 @@ class Game:
     pause = False
     step = False
 
-    def __init__(self, width: int, height: int):
+    def __init__(
+        self,
+        width: int,
+        height: int,
+        map_size: int = 50,
+        colony_size: int = 50,
+        max_epoch: int = None,
+    ):
         self.window = [width, height]
         self.init_pygame()
-        self.map = Map(50, 5, 0.5, self.screen)
-        self.colony = Colony(self.screen, self.map, 200, 1)
+        self.read_input("../base_sintetica_4_g.in")
+        self.map = Map(map_size, 5, self.screen, self.database)
+        self.colony = Colony(self.screen, self.map, colony_size, 1)
         self.mouse_offset_x = 0
         self.mouse_offset_y = 0
         self.simulation_pace = 10
+        self.max_epoch = max_epoch
+
+    def read_input(self, path: str):
+        self.database: List[Data] = []
+        path = Path(__file__).parent / path
+        fix_float = lambda x: float(x.replace(",", "."))
+
+        with open(Path(__file__).parent / path, "r") as file:
+            for line in file:
+                line = line.strip()
+                line = line.split(" ")
+                data = Data(fix_float(line[0]), fix_float(line[1]), int(line[2]))
+                self.database.append(data)
 
     def init_pygame(self):
         pygame.init()
@@ -29,6 +54,7 @@ class Game:
         pygame.display.set_caption("Ant Clusterring")
 
         self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont("Impact", 60)
 
     def run(self):
         self.time_delta = self.clock.tick(60) / 1000.0
@@ -90,9 +116,10 @@ class Game:
             self.screen.fill(GRAY)
             self.colony.draw()
             if not self.pause or self.step:
-                print(f"Época: {self.epoch}")
+                textsurface = self.font.render(f"Época: {self.epoch}", False, (0, 0, 0))
+                self.screen.blit(textsurface, (0, 0))
 
 
 if __name__ == "__main__":
-    game = Game(1200, 1200)
+    game = Game(width=1200, height=1200, map_size=50, colony_size=50, max_epoch=1000)
     game.run()

@@ -1,3 +1,4 @@
+from map import CELL_STATE, Map
 from random import randint, sample
 import math
 
@@ -24,7 +25,7 @@ def get_view(grid, x, y, n):
 
 
 class Colony:
-    def __init__(self, screen, map_grid, population_size, ant_view_range):
+    def __init__(self, screen, map_grid: Map, population_size, ant_view_range):
         self.map = map_grid
         self.screen = screen
         self.population_size = population_size
@@ -39,7 +40,7 @@ class Colony:
 
         for x, y in candidates:
             ant = Ant((x, y), self.ANT_VIEW_RANGE)
-            self.map.grid[x][y]["busy"] = 1
+            self.map.grid[x][y].busy = CELL_STATE.OCCUPIED
             self.ants.append(ant)
 
     def update_ants_position(self):
@@ -59,12 +60,12 @@ class Colony:
         for row in range(self.map.size):
             for column in range(self.map.size):
                 color = LIGHT_GRAY
-                if self.map.grid[row][column]["busy"] == 2:
+                if self.map.grid[row][column].busy == CELL_STATE.CARRYING:
                     color = RED
-                elif self.map.grid[row][column]["busy"] == 1:
+                elif self.map.grid[row][column].busy == CELL_STATE.OCCUPIED:
                     color = GREEN
-                elif self.map.grid[row][column]["value"] > 0:
-                    color = BLACK
+                elif self.map.grid[row][column].value:
+                    color = GRADIENT_4[self.map.grid[row][column].value.label - 1]
                 pygame.draw.rect(
                     self.screen,
                     color,
