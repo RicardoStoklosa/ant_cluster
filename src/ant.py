@@ -13,7 +13,9 @@ def p_pick(k, f):
 def p_drop(k, f):
     return 2 * f if f < k else 1
 
-
+alpha = 14
+k1 = 1
+k2 = 1
 class Ant:
     def __init__(self, position, range):
         self.x = position[0]
@@ -74,22 +76,27 @@ class Ant:
             world.grid[self.x][self.y].value = self.carrying
             self.carrying = None
 
-    def look_and_count(self, view_field: List[List[Optional[Data]]]):
-        n_local = -1  # discounting himself
+    def euclidian_distance(self, a, b):
+        return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+
+    def data_similarity(self, current, view_field: List[List[Optional[Data]]]):
+        sum = 0
+        count = 1
 
         for row in view_field:
-            for col in row:
-                if col.value:
-                    n_local += 1
-        return n_local
+            for item in row:
+                if item.value:
+                    count+=1
+                    sum += 1 - self.euclidian_distance(current, (item.value.x, item.value.y)) / float(alpha)
+        return max(sum / float(count**2), 0)
 
     def action(self, world: Map, view_field: int):
-        if self.carrying is not None:
+        if self.carrying:
             if world.grid[self.x][self.y].value:
                 self.walk(world)
             else:
-                f = self.look_and_count(view_field) / self.field_size
-                p = p_drop(self.k_drop, f)
+                f = self.data_similarity((self.carrying.x, self.carrying.y), view_field)
+                p = (f/(k2+f)**2)
                 if p > random():
                     self.drop_body(world)
                     self.walk(world)
@@ -97,8 +104,11 @@ class Ant:
                     self.walk(world)
         else:
             if world.grid[self.x][self.y].value:
-                f = self.look_and_count(view_field) / self.field_size
-                p = p_pick(self.k_pick, f)
+                x = world.grid[self.x][self.y].value.x
+                y = world.grid[self.x][self.y].value.y
+                f = self.data_similarity((x, y), view_field)
+                print(f)
+                p = (k1/(k1+f)**2)
                 if p > random():
                     self.pick_body(world)
                     self.walk(world)

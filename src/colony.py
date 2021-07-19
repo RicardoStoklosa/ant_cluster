@@ -60,11 +60,11 @@ class Colony:
         for row in range(self.map.size):
             for column in range(self.map.size):
                 color = LIGHT_GRAY
-                if self.map.grid[row][column].busy == CELL_STATE.CARRYING:
-                    color = RED
-                elif self.map.grid[row][column].busy == CELL_STATE.OCCUPIED:
-                    color = GREEN
-                elif self.map.grid[row][column].value:
+                # if self.map.grid[row][column].busy == CELL_STATE.CARRYING:
+                #     color = RED
+                # elif self.map.grid[row][column].busy == CELL_STATE.OCCUPIED:
+                #     color = GREEN
+                if self.map.grid[row][column].value:
                     color = GRADIENT_4[self.map.grid[row][column].value.label - 1]
                 pygame.draw.rect(
                     self.screen,
