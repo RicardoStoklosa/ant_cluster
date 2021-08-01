@@ -6,7 +6,7 @@ from map import Map
 from colors import *
 from colony import Colony
 from pathlib import Path
-from data import Data
+from datatypes import InformationData
 
 
 class Game:
@@ -14,6 +14,7 @@ class Game:
     running = True
     pause = False
     step = False
+    stop_render = False
 
     def __init__(
         self,
@@ -27,14 +28,14 @@ class Game:
         self.init_pygame()
         self.read_input("../base_sintetica_4_g.in")
         self.map = Map(map_size, 5, self.screen, self.database)
-        self.colony = Colony(self.screen, self.map, colony_size, 1)
+        self.colony = Colony(self.screen, self.map, colony_size, 2, max_epoch)
         self.mouse_offset_x = 0
         self.mouse_offset_y = 0
         self.simulation_pace = 10
         self.max_epoch = max_epoch
 
     def read_input(self, path: str):
-        self.database: List[Data] = []
+        self.database: List[InformationData] = []
         path = Path(__file__).parent / path
         fix_float = lambda x: float(x.replace(",", "."))
 
@@ -42,7 +43,9 @@ class Game:
             for line in file:
                 line = line.strip()
                 line = line.split(" ")
-                data = Data(fix_float(line[0]), fix_float(line[1]), int(line[2]))
+                data = InformationData(
+                    fix_float(line[0]), fix_float(line[1]), int(line[2])
+                )
                 self.database.append(data)
 
     def init_pygame(self):
@@ -73,7 +76,9 @@ class Game:
                 self.simulation_calculus()
             self.simulation_render(self.simulation_pace)
 
-            pygame.display.flip()
+            pace = 1000
+            if self.epoch % pace == 0 or not self.stop_render:
+                pygame.display.flip()
 
     def handle_keyboard(self, events):
         for event in events:
@@ -83,6 +88,8 @@ class Game:
                     self.step = True
                 if event.key == pygame.K_SPACE:
                     self.pause = not self.pause
+                if event.key == pygame.K_r:
+                    self.stop_render = not self.stop_render
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 4:
                     self.map.zoom += map_mov
@@ -108,18 +115,22 @@ class Game:
             self.gui.process_events(event)
 
     def simulation_calculus(self):
-        self.colony.update_ants_position()
-        self.epoch += 1
+        continue_update = self.colony.update_ants_position(self.epoch)
+        if continue_update:
+            self.epoch += 1
+        else:
+            self.pause = True
 
     def simulation_render(self, pace):
+        pace = pace if not self.stop_render else 1000
         if self.epoch % pace == 0 or self.pause:
             self.screen.fill(GRAY)
-            self.colony.draw()
-            if not self.pause or self.step:
-                textsurface = self.font.render(f"Época: {self.epoch}", False, (0, 0, 0))
-                self.screen.blit(textsurface, (0, 0))
+            if not self.stop_render:
+                self.colony.draw()
+            textsurface = self.font.render(f"Época: {self.epoch}", False, (0, 0, 0))
+            self.screen.blit(textsurface, (0, 0))
 
 
 if __name__ == "__main__":
-    game = Game(width=1200, height=1200, map_size=50, colony_size=50, max_epoch=1000)
+    game = Game(width=800, height=800, map_size=100, colony_size=50, max_epoch=50000)
     game.run()
