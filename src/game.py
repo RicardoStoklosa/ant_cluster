@@ -132,5 +132,5 @@ class Game:
 
 
 if __name__ == "__main__":
-    game = Game(width=800, height=800, map_size=100, colony_size=50, max_epoch=50000)
+    game = Game(width=800, height=800, map_size=50, colony_size=50, max_epoch=50000)
     game.run()

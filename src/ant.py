@@ -4,6 +4,7 @@ from typing import List, Optional
 import math
 from random import choices, random
 from colors import *
+import numpy as np
 
 
 def sigmoid(c, x):
@@ -13,19 +14,21 @@ def sigmoid(c, x):
 def euclidian_distance(a: InformationData, b: InformationData):
     return math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2)
 
-c = 10
+
+c = 5 * 2
+
+
 class Ant:
     def __init__(self, position: Position, field_range):
         self.x = position.x
         self.y = position.y
         self.field_range = field_range
-        self.field_size = (1 + 2 * field_range) ** 2 - 1
+        self.field_size = (1 + 2 * field_range) ** 2
         self.data_carrying: Optional[InformationData] = None
-
         self._block_size = 1
         self._margin = math.ceil(self._block_size * 0.1)
 
-    def _torus_movement(self, axis, size, movement=1):
+    def _torus_movement(self, axis, size, movement=2):
         if axis < 0:
             axis = size - movement
         elif axis >= size:
@@ -47,7 +50,6 @@ class Ant:
 
                     if world.grid[x][y].busy is CELL_STATE.EMPTY:
                         valid_movements.append((x, y))
-
         return valid_movements
 
     def _avg_similarity(
@@ -61,8 +63,7 @@ class Ant:
                     dist = euclidian_distance(current, item.value)
                     ret = 1 - dist / world.alpha
                     s += ret
-
-        fi = s / (self.field_size ** 2)
+        fi = s / self.field_size
         return max(0, fi)
 
     def _walk(self, world: Map):
@@ -88,15 +89,15 @@ class Ant:
         if self.data_carrying:
             if world.grid[self.x][self.y].value is None:
                 f = self._avg_similarity(world, self.data_carrying, view_field)
-                p = sigmoid(self.field_range * c, f)
-                if p >= random():
+                p = sigmoid(c, f)
+                if p >= np.random.uniform(0.0, 1.0):
                     self._drop_body(world)
         else:
             if world.grid[self.x][self.y].value:
                 f = self._avg_similarity(
                     world, world.grid[self.x][self.y].value, view_field
                 )
-                p = 1 - sigmoid(self.field_range * c, f)
-                if p >= random():
+                p = 1 - sigmoid(c, f)
+                if p >= np.random.uniform(0.0, 1.0):
                     self._pick_body(world)
         self._walk(world)
