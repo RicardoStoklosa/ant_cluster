@@ -7,7 +7,10 @@ from colors import *
 from colony import Colony
 from pathlib import Path
 from datatypes import InformationData
+import os
+import time
 
+out_dir = Path(__file__).parents[1] / "out"
 
 class Game:
     epoch = 0
@@ -18,21 +21,27 @@ class Game:
 
     def __init__(
         self,
+        file: str,
         width: int,
         height: int,
         map_size: int = 50,
         colony_size: int = 50,
         max_epoch: int = None,
+        ant_range: int = 1
     ):
         self.window = [width, height]
         self.init_pygame()
-        self.read_input("../base_sintetica_4_g.in")
+        self.read_input(file)
         self.map = Map(map_size, 5, self.screen, self.database)
-        self.colony = Colony(self.screen, self.map, colony_size, 2, max_epoch)
+        self.colony = Colony(self.screen, self.map, colony_size, ant_range, max_epoch)
         self.mouse_offset_x = 0
         self.mouse_offset_y = 0
         self.simulation_pace = 10
         self.max_epoch = max_epoch
+        self.id = int(time.time())
+
+        if not os.path.exists(out_dir):
+            os.mkdir(out_dir)
 
     def read_input(self, path: str):
         self.database: List[InformationData] = []
@@ -67,6 +76,9 @@ class Game:
             events = pygame.event.get()
             self.handle_keyboard(events)
 
+            if(self.epoch == 0):
+                self.screenshot("start")
+
             if self.step:
                 self.simulation_calculus()
                 self.simulation_render(1)
@@ -77,6 +89,7 @@ class Game:
             self.simulation_render(self.simulation_pace)
 
             pace = 1000
+
             if self.epoch % pace == 0 or not self.stop_render:
                 pygame.display.flip()
 
@@ -119,16 +132,27 @@ class Game:
         if continue_update:
             self.epoch += 1
         else:
+            self.stop_render = False
             self.pause = True
+            self.screenshot("end")
 
     def simulation_render(self, pace):
         pace = pace if not self.stop_render else 1000
+
         if self.epoch % pace == 0 or self.pause:
+            self.render(not self.stop_render)
+
+    def render(self, render_map = True):
             self.screen.fill(GRAY)
-            if not self.stop_render:
+        if render_map:
                 self.colony.draw()
-            textsurface = self.font.render(f"Época: {self.epoch}", False, (0, 0, 0))
+        textsurface = self.font.render(f"Época: {self.epoch}", False, WHITE)
             self.screen.blit(textsurface, (0, 0))
+
+    def screenshot(self, name):
+        self.render()
+        pygame.image.save(self.screen, f"{out_dir}/{self.id}_{name}.jpg")
+
 
 
 if __name__ == "__main__":
