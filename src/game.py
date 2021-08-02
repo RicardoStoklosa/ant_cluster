@@ -143,11 +143,11 @@ class Game:
             self.render(not self.stop_render)
 
     def render(self, render_map = True):
-            self.screen.fill(GRAY)
+        self.screen.fill(GRAY)
         if render_map:
-                self.colony.draw()
+            self.colony.draw()
         textsurface = self.font.render(f"Época: {self.epoch}", False, WHITE)
-            self.screen.blit(textsurface, (0, 0))
+        self.screen.blit(textsurface, (0, 0))
 
     def screenshot(self, name):
         self.render()
@@ -156,5 +156,7 @@ class Game:
 
 
 if __name__ == "__main__":
-    game = Game(width=800, height=800, map_size=50, colony_size=50, max_epoch=50000)
+    labels_4 = "../base_sintetica_4_g.in"
+    labels_15 = "../base_sintetica_15_g.in"
+    game = Game(file=labels_15, width=800, height=800, map_size=50, colony_size=50, max_epoch=500000, ant_range=2)
     game.run()
