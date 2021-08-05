@@ -1,5 +1,7 @@
+from map import CELL_STATE, Map
 from random import randint, sample
 import math
+from datatypes import Position
 
 import pygame
 
@@ -24,28 +26,34 @@ def get_view(grid, x, y, n):
 
 
 class Colony:
-    def __init__(self, screen, map_grid, population_size, ant_view_range):
+    def __init__(self, screen, map_grid: Map, population_size, ant_view_range, max_age):
         self.map = map_grid
         self.screen = screen
         self.population_size = population_size
         self.ants = []
         self.ANT_VIEW_RANGE = ant_view_range
+        self.max_age = max_age
         self.generate_ants()
-        self.pos = (0, 0)
 
     def generate_ants(self):
-        indices = [(m, n) for m in range(self.map.size) for n in range(self.map.size)]
+        indices = [
+            Position(m, n) for m in range(self.map.size) for n in range(self.map.size)
+        ]
         candidates = sample(indices, self.population_size)
 
-        for x, y in candidates:
-            ant = Ant((x, y), self.ANT_VIEW_RANGE)
-            self.map.grid[x][y]["busy"] = 1
+        for position in candidates:
+            ant = Ant(position, self.ANT_VIEW_RANGE)
+            self.map.grid[position.x][position.y].busy = CELL_STATE.OCCUPIED
             self.ants.append(ant)
 
-    def update_ants_position(self):
+    def update_ants_position(self, epoch):
+        continue_update = False
         for ant in self.ants:
-            view_field = get_view(self.map.grid, ant.x, ant.y, self.ANT_VIEW_RANGE)
-            ant.action(self.map, view_field)
+            if epoch < self.max_age or ant.data_carrying:
+                continue_update = True
+                view_field = get_view(self.map.grid, ant.x, ant.y, self.ANT_VIEW_RANGE)
+                ant.action(self.map, view_field)
+        return continue_update
 
     def draw(self):
         zoom_p = self.map._zoom / 100
@@ -58,13 +66,10 @@ class Colony:
         )
         for row in range(self.map.size):
             for column in range(self.map.size):
-                color = LIGHT_GRAY
-                if self.map.grid[row][column]["busy"] == 2:
-                    color = RED
-                elif self.map.grid[row][column]["busy"] == 1:
-                    color = GREEN
-                elif self.map.grid[row][column]["value"] > 0:
-                    color = BLACK
+                color = BLACK
+                if self.map.grid[row][column].value:
+                    label = self.map.grid[row][column].value.label
+                    color = pygame.Color(DATA_COLORS[label - 1])
                 pygame.draw.rect(
                     self.screen,
                     color,
