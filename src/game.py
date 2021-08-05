@@ -12,6 +12,7 @@ import time
 
 out_dir = Path(__file__).parents[1] / "out"
 
+
 class Game:
     epoch = 0
     running = True
@@ -19,25 +20,22 @@ class Game:
     step = False
     stop_render = False
 
-    def __init__(
-        self,
-        file: str,
-        width: int,
-        height: int,
-        map_size: int = 50,
-        colony_size: int = 50,
-        max_epoch: int = None,
-        ant_range: int = 1
-    ):
-        self.window = [width, height]
+    def __init__(self, **kwargs):
+        self.window = [kwargs["width"], kwargs["height"]]
         self.init_pygame()
-        self.read_input(file)
-        self.map = Map(map_size, 5, self.screen, self.database)
-        self.colony = Colony(self.screen, self.map, colony_size, ant_range, max_epoch)
+        self.read_input(kwargs["file"])
+        self.map = Map(kwargs["map_size"], 5, self.screen, self.database)
+        self.colony = Colony(
+            self.screen,
+            self.map,
+            kwargs["colony_size"],
+            kwargs["ant_range"],
+            kwargs["max_epoch"],
+        )
         self.mouse_offset_x = 0
         self.mouse_offset_y = 0
         self.simulation_pace = 10
-        self.max_epoch = max_epoch
+        self.max_epoch = kwargs["max_epoch"]
         self.id = int(time.time())
 
         if not os.path.exists(out_dir):
@@ -76,7 +74,7 @@ class Game:
             events = pygame.event.get()
             self.handle_keyboard(events)
 
-            if(self.epoch == 0):
+            if self.epoch == 0:
                 self.screenshot("start")
 
             if self.step:
@@ -142,7 +140,7 @@ class Game:
         if self.epoch % pace == 0 or self.pause:
             self.render(not self.stop_render)
 
-    def render(self, render_map = True):
+    def render(self, render_map=True):
         self.screen.fill(GRAY)
         if render_map:
             self.colony.draw()
@@ -154,9 +152,35 @@ class Game:
         pygame.image.save(self.screen, f"{out_dir}/{self.id}_{name}.jpg")
 
 
+class SimulationConfig:
+    def __init__(
+        self,
+        file: str,
+        width: int = 800,
+        height: int = 800,
+        map_size: int = 50,
+        colony_size: int = 50,
+        ant_range: int = 1,
+        max_epoch: int = None,
+    ):
+        self.file = file
+        self.width = width
+        self.height = height
+        self.map_size = map_size
+        self.colony_size = colony_size
+        self.ant_range = ant_range
+        self.max_epoch = max_epoch
+
 
 if __name__ == "__main__":
+    simulation = SimulationConfig(file=input())
+
+    simulation.map_size = int(input())
+    simulation.colony_size = int(input())
+    simulation.ant_range = int(input())
+    simulation.max_epoch = int(input())
+
     labels_4 = "../base_sintetica_4_g.in"
     labels_15 = "../base_sintetica_15_g.in"
-    game = Game(file=labels_15, width=800, height=800, map_size=50, colony_size=50, max_epoch=500000, ant_range=2)
+    game = Game(**simulation.__dict__)
     game.run()
